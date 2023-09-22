@@ -1,1 +1,0 @@
-Needs to add the image path to pubspec.yaml
