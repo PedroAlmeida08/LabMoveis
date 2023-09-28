@@ -28,9 +28,18 @@ class _HomeState extends State<Home> {
         i = 1;
       }
       text = resultado[i];
+
+      if (escolhaApp == 0) {
+        imgEscolhaApp = "images/pedra.png";
+      } else if (escolhaApp == 1) {
+        imgEscolhaApp = "images/papel.png";
+      } else if (escolhaApp == 2) {
+        imgEscolhaApp = "images/tesoura.png";
+      }
     });
   }
 
+  String imgEscolhaApp = "images/default.png";
   String text = "Escolha uma opção!";
   int escolhaUser = -1;
   int escolhaApp = -1;
@@ -40,43 +49,48 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(title: const Text('JokenPo')),
       body: Center(
+          child: Container(
+        padding: EdgeInsets.only(bottom: 120),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const Text("Escolha do App"),
-            Image.asset("images/default.png"),
+            const Text(
+              "Escolha do App",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Image.asset(imgEscolhaApp, height: 180),
             Text(text,
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            Row(children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
               GestureDetector(
                 onTap: () {
                   escolhaUser = 0;
-                  escolhaApp = Random().nextInt(2);
+                  escolhaApp = Random().nextInt(resultado.length);
                   _play(escolhaUser, escolhaApp);
                 },
-                child: Image.asset("images/pedra.png"),
+                child: Image.asset("images/pedra.png", height: 100),
               ),
               GestureDetector(
                 onTap: () {
                   escolhaUser = 1;
-                  escolhaApp = Random().nextInt(2);
+                  escolhaApp = Random().nextInt(resultado.length);
                   _play(escolhaUser, escolhaApp);
                 },
-                child: Image.asset("images/papel.png"),
+                child: Image.asset("images/papel.png", height: 100),
               ),
               GestureDetector(
                 onTap: () {
                   escolhaUser = 2;
-                  escolhaApp = Random().nextInt(2);
+                  escolhaApp = Random().nextInt(resultado.length);
                   _play(escolhaUser, escolhaApp);
                 },
-                child: Image.asset("images/tesoura.png"),
+                child: Image.asset("images/tesoura.png", height: 100),
               )
             ])
           ],
         ),
-      ),
+      )),
     );
   }
 }
