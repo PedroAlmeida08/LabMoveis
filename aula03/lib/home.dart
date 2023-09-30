@@ -25,18 +25,18 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Entrada de Dados"),
+        title: const Text("Entrada de Dados"),
       ),
       body: Container(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             TextField(
               keyboardType: TextInputType.text,
-              decoration: InputDecoration(labelText: "Nome"),
+              decoration: const InputDecoration(labelText: "Nome"),
               maxLength: 30,
               maxLengthEnforcement: MaxLengthEnforcement.none,
-              style: TextStyle(fontSize: 30, color: Colors.grey),
+              style: const TextStyle(fontSize: 30, color: Colors.grey),
               onChanged: (String value) {
                 print("OnChanged: $value");
               },
@@ -47,11 +47,11 @@ class _HomeState extends State<Home> {
             ),
             TextField(
               keyboardType: TextInputType.text,
-              decoration: InputDecoration(labelText: "Idade"),
-              style: TextStyle(fontSize: 30, color: Colors.grey),
+              decoration: const InputDecoration(labelText: "Idade"),
+              style: const TextStyle(fontSize: 30, color: Colors.grey),
               controller: ageController,
             ),
-            TextField(
+            const TextField(
               keyboardType: TextInputType.text,
               decoration: InputDecoration(labelText: "Senha"),
               obscureText: true,
@@ -59,11 +59,11 @@ class _HomeState extends State<Home> {
             ),
             CheckboxListTile(
               value: checkbox1,
-              title: Text("Churrasco"),
-              subtitle: Text("com molho à campanha"),
+              title: const Text("Churrasco"),
+              subtitle: const Text("com molho à campanha"),
               activeColor: Colors.amber,
               /*selected: true,*/
-              secondary: Icon(Icons.account_balance_wallet),
+              secondary: const Icon(Icons.account_balance_wallet),
               onChanged: (bool? value) {
                 print("Checkbox: $value");
                 checkbox1 = value;
@@ -72,11 +72,11 @@ class _HomeState extends State<Home> {
             ),
             CheckboxListTile(
               value: checkbox2,
-              title: Text("IceTea"),
-              subtitle: Text("limão"),
+              title: const Text("IceTea"),
+              subtitle: const Text("limão"),
               activeColor: Colors.amber,
               /*selected: true,*/
-              secondary: Icon(Icons.account_balance_wallet),
+              secondary: const Icon(Icons.account_balance_wallet),
               onChanged: (bool? value) {
                 print("Checkbox: $value");
                 checkbox2 = value;
@@ -86,7 +86,7 @@ class _HomeState extends State<Home> {
             RadioListTile(
               value: "m",
               groupValue: sexo,
-              title: Text("Masculino"),
+              title: const Text("Masculino"),
               onChanged: (String? value) {
                 sexo = value;
                 setState(() {});
@@ -95,7 +95,7 @@ class _HomeState extends State<Home> {
             RadioListTile(
               value: "f",
               groupValue: sexo,
-              title: Text("Feminino"),
+              title: const Text("Feminino"),
               onChanged: (String? value) {
                 sexo = value;
                 setState(() {});
@@ -103,14 +103,14 @@ class _HomeState extends State<Home> {
             ),
             SwitchListTile(
                 value: switch1,
-                title: Text("ABC"),
+                title: const Text("ABC"),
                 onChanged: (bool value) {
                   switch1 = value;
                   setState(() {});
                 }),
             ElevatedButton(
-              child: Text("Salvar"),
               onPressed: save,
+              child: const Text("Salvar"),
             )
           ],
         ),
