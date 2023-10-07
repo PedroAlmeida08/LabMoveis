@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:app001/cardObj.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,13 +11,15 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   TextEditingController nameController = TextEditingController();
-  TextEditingController ageController = TextEditingController();
   bool? numbers = false;
   bool? letters = false;
-  String card1 = "";
-  String card2 = "";
+  bool iniciar = false;
+  CardObj cartaLimpa = CardObj(-1, "", false);
+  CardObj card1 = CardObj(-1, "", false);
+  CardObj card2 = CardObj(-1, "", false);
   int ct = 0;
   int tentativas = 0;
+  int pares = 0;
   List<int> nImgCard = [
     0,
     0,
@@ -41,18 +42,7 @@ class _HomeState extends State<Home> {
     9,
     9
   ];
-  List<String> imgCard = [
-    "images/fundo.png",
-    "images/fundo.png",
-    "images/fundo.png",
-    "images/fundo.png",
-    "images/fundo.png",
-    "images/fundo.png",
-    "images/fundo.png",
-    "images/fundo.png",
-    "images/fundo.png",
-    "images/fundo.png",
-  ];
+
   List<String> numbersFigures = [
     "images/0.png",
     "images/1.png",
@@ -77,7 +67,8 @@ class _HomeState extends State<Home> {
     "images/i.png",
     "images/j.png"
   ];
-  List<String> bothFigures = [
+
+  List<String> imgCard = [
     "images/0.png",
     "images/1.png",
     "images/2.png",
@@ -90,60 +81,111 @@ class _HomeState extends State<Home> {
     "images/e.png"
   ];
 
-  String imgCard1 = "images/fundo.png";
-  String imgCard2 = "images/fundo.png";
-  String imgCard3 = "images/fundo.png";
-  String imgCard4 = "images/fundo.png";
-  String imgCard5 = "images/fundo.png";
-  String imgCard6 = "images/fundo.png";
-  String imgCard7 = "images/fundo.png";
-  String imgCard8 = "images/fundo.png";
-  String imgCard9 = "images/fundo.png";
-  String imgCard10 = "images/fundo.png";
-  String imgCard11 = "images/fundo.png";
-  String imgCard12 = "images/fundo.png";
-  String imgCard13 = "images/fundo.png";
-  String imgCard14 = "images/fundo.png";
-  String imgCard15 = "images/fundo.png";
-  String imgCard16 = "images/fundo.png";
-  String imgCard17 = "images/fundo.png";
-  String imgCard18 = "images/fundo.png";
-  String imgCard19 = "images/fundo.png";
-  String imgCard20 = "images/fundo.png";
+  String imgFundo = "images/fundo.png";
 
-  void play() {
-    String modo = "Nenhum selecionado";
+  List<CardObj> cartas = [
+    CardObj(0, "images/fundo.png", false),
+    CardObj(1, "images/fundo.png", false),
+    CardObj(2, "images/fundo.png", false),
+    CardObj(3, "images/fundo.png", false),
+    CardObj(4, "images/fundo.png", false),
+    CardObj(5, "images/fundo.png", false),
+    CardObj(6, "images/fundo.png", false),
+    CardObj(8, "images/fundo.png", false),
+    CardObj(9, "images/fundo.png", false),
+    CardObj(10, "images/fundo.png", false),
+    CardObj(11, "images/fundo.png", false),
+    CardObj(12, "images/fundo.png", false),
+    CardObj(13, "images/fundo.png", false),
+    CardObj(14, "images/fundo.png", false),
+    CardObj(15, "images/fundo.png", false),
+    CardObj(16, "images/fundo.png", false),
+    CardObj(17, "images/fundo.png", false),
+    CardObj(18, "images/fundo.png", false),
+    CardObj(19, "images/fundo.png", false),
+    CardObj(20, "images/fundo.png", false),
+  ];
+
+  void init() {
     if ((numbers == true) & (letters == false)) {
-      modo = "Números";
       imgCard = numbersFigures;
     } else if ((letters == true) & (numbers == false)) {
-      modo = "Letras";
       imgCard = lettersFigures;
     } else if ((letters == true) & (numbers == true)) {
-      modo = "Ambos";
-      imgCard = bothFigures;
+      imgCard = imgCard;
     }
-    print("Modo: ${modo}");
-    //nImgCard.shuffle();
+    iniciar = true;
+    nImgCard.shuffle();
   }
 
-  int resultado() {
-    int res = -1;
-    print("Card1: ${card1}");
-    print("Card2: ${card2}");
-    if (card1 == card2) {
-      print("Acertou!");
-      res = 1;
-    } else if ((card1 != card2)) {
-      print("Errou!");
-      res = 0;
+  void play(CardObj carta, int pos) {
+    if ((carta.isFlipped == false) & (ct < 2)) {
+      setState(() {
+        carta.img = imgCard[nImgCard[pos]];
+        carta.isFlipped = true;
+        ct++;
+      });
+      if ((card1.isFlipped == false) & (card2.isFlipped == false)) {
+        setState(() {
+          card1 = carta;
+        });
+      } else if ((card1.isFlipped == true) &
+          (card2.isFlipped == false) &
+          (card1.pos != card2.pos)) {
+        setState(() {
+          card2 = carta;
+        });
+      }
+      if ((card1.isFlipped == true) & (card2.isFlipped == true)) {
+        if ((card1.img != "") & (card2.img != "") & (card1.img == card2.img)) {
+          setState(() {
+            pares++;
+          });
+        } else if ((card1.img != "") &
+            (card2.img != "") &
+            (card1.img != card2.img)) {
+          setState(() {
+            for (int i = 0; i < cartas.length; i++) {
+              if ((card1.pos == cartas[i].pos) | (card2.pos == cartas[i].pos)) {
+                cartas[i].img = imgFundo;
+                cartas[i].isFlipped = false;
+              }
+            }
+          });
+        }
+        card1 = cartaLimpa;
+        card2 = cartaLimpa;
+        tentativas++;
+        ct = 0;
+      }
     }
-    card1 = "";
-    card2 = "";
+    if (pares == 10) {
+      print("Acabou!");
+    }
+  }
 
-    ct = -1;
+  void resetar() {
+    setState(() {
+      for (int i = 0; i < cartas.length; i++) {
+        cartas[i].img = imgFundo;
+        cartas[i].isFlipped = false;
+      }
+    });
+    tentativas = 0;
+    init();
+  }
 
-    return res;
+  void trocarModo() {
+    setState(() {
+      for (int i = 0; i < cartas.length; i++) {
+        cartas[i].img = imgFundo;
+        cartas[i].isFlipped = false;
+      }
+    });
+    tentativas = 0;
+    iniciar = false;
+    numbers = false;
+    letters = false;
   }
 
   @override
@@ -173,7 +215,6 @@ class _HomeState extends State<Home> {
                     activeColor: Colors.blue,
                     secondary: const Icon(Icons.numbers),
                     onChanged: (bool? value) {
-                      print("Checkbox: $value");
                       numbers = value;
                       setState(() {});
                     },
@@ -184,18 +225,45 @@ class _HomeState extends State<Home> {
                     activeColor: Colors.blue,
                     secondary: const Icon(Icons.abc),
                     onChanged: (bool? value) {
-                      print("Checkbox: $value");
                       letters = value;
                       setState(() {});
                     },
                   ),
-                  ElevatedButton(
-                    onPressed: play,
-                    child: const Text("Iniciar"),
-                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            if (iniciar == false) {
+                              init();
+                            }
+                          },
+                          child: const Text("Iniciar"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (iniciar == true) {
+                              resetar();
+                            }
+                          },
+                          child: const Text("Resetar"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (iniciar == true) {
+                              trocarModo();
+                            }
+                          },
+                          child: const Text("Trocar modo"),
+                        ),
+                      ]),
+                  const SizedBox(height: 20),
+                  Text("Tentativas: $tentativas",
+                      style: const TextStyle(color: Colors.black)),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Column(
                 children: [
                   Row(
@@ -203,96 +271,35 @@ class _HomeState extends State<Home> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          if (ct < 2) {
-                            imgCard1 = imgCard[nImgCard[0]];
-                            if (ct == 0) {
-                              card1 = imgCard1;
-                            } else if (ct == 1) {
-                              card2 = imgCard1;
-                            }
-                            ct++;
+                          if (iniciar == true) {
+                            play(cartas[0], 0);
                           }
-                          setState(() {});
                         },
-                        child: Image.asset(imgCard1, height: 100),
+                        child: Image.asset(cartas[0].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          if (ct < 2) {
-                            imgCard2 = imgCard[nImgCard[1]];
-                            if (ct == 0) {
-                              card1 = imgCard2;
-                            } else if (ct == 1) {
-                              card2 = imgCard2;
-                            }
-                            ct++;
+                          if (iniciar == true) {
+                            play(cartas[1], 1);
                           }
-                          setState(() {});
                         },
-                        child: Image.asset(imgCard2, height: 100),
+                        child: Image.asset(cartas[1].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          if (ct < 2) {
-                            imgCard3 = imgCard[nImgCard[2]];
-                            if (ct == 0) {
-                              card1 = imgCard3;
-                            } else if (ct == 1) {
-                              card2 = imgCard3;
-                            }
-                            ct++;
+                          if (iniciar == true) {
+                            play(cartas[2], 2);
                           }
-                          setState(() {});
                         },
-                        child: Image.asset(imgCard3, height: 100),
+                        child: Image.asset(cartas[2].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          if (ct < 2) {
-                            imgCard4 = imgCard[nImgCard[3]];
-                            if (ct == 0) {
-                              card1 = imgCard4;
-                            } else if (ct == 1) {
-                              card2 = imgCard4;
-                            }
-                            ct++;
+                          if (iniciar == true) {
+                            play(cartas[3], 3);
                           }
-                          setState(() {});
                         },
-                        child: Image.asset(imgCard4, height: 100),
-                      ),
-                    ],
-                  ),
-                  /*Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          imgCard5 = imgCard[nImgCard[4]];
-                          setState(() {});
-                        },
-                        child: Image.asset(imgCard5, height: 100),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          imgCard6 = imgCard[nImgCard[5]];
-                          setState(() {});
-                        },
-                        child: Image.asset(imgCard6, height: 100),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          imgCard7 = imgCard[nImgCard[6]];
-                          setState(() {});
-                        },
-                        child: Image.asset(imgCard7, height: 100),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          imgCard8 = imgCard[nImgCard[7]];
-                          setState(() {});
-                        },
-                        child: Image.asset(imgCard8, height: 100),
+                        child: Image.asset(cartas[3].img, height: 100),
                       ),
                     ],
                   ),
@@ -301,31 +308,35 @@ class _HomeState extends State<Home> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          imgCard9 = imgCard[nImgCard[8]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[4], 4);
+                          }
                         },
-                        child: Image.asset(imgCard9, height: 100),
+                        child: Image.asset(cartas[4].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard10 = imgCard[nImgCard[9]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[5], 5);
+                          }
                         },
-                        child: Image.asset(imgCard10, height: 100),
+                        child: Image.asset(cartas[5].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard11 = imgCard[nImgCard[10]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[6], 6);
+                          }
                         },
-                        child: Image.asset(imgCard11, height: 100),
+                        child: Image.asset(cartas[6].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard12 = imgCard[nImgCard[11]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[7], 7);
+                          }
                         },
-                        child: Image.asset(imgCard12, height: 100),
+                        child: Image.asset(cartas[7].img, height: 100),
                       ),
                     ],
                   ),
@@ -334,31 +345,35 @@ class _HomeState extends State<Home> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          imgCard13 = imgCard[nImgCard[12]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[8], 8);
+                          }
                         },
-                        child: Image.asset(imgCard13, height: 100),
+                        child: Image.asset(cartas[8].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard14 = imgCard[nImgCard[13]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[9], 9);
+                          }
                         },
-                        child: Image.asset(imgCard14, height: 100),
+                        child: Image.asset(cartas[9].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard15 = imgCard[nImgCard[14]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[10], 10);
+                          }
                         },
-                        child: Image.asset(imgCard15, height: 100),
+                        child: Image.asset(cartas[10].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard16 = imgCard[nImgCard[15]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[11], 11);
+                          }
                         },
-                        child: Image.asset(imgCard16, height: 100),
+                        child: Image.asset(cartas[11].img, height: 100),
                       ),
                     ],
                   ),
@@ -367,38 +382,79 @@ class _HomeState extends State<Home> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          imgCard17 = imgCard[nImgCard[16]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[12], 12);
+                          }
                         },
-                        child: Image.asset(imgCard17, height: 100),
+                        child: Image.asset(cartas[12].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard18 = imgCard[nImgCard[17]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[13], 13);
+                          }
                         },
-                        child: Image.asset(imgCard18, height: 100),
+                        child: Image.asset(cartas[13].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard19 = imgCard[nImgCard[18]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[14], 14);
+                          }
                         },
-                        child: Image.asset(imgCard19, height: 100),
+                        child: Image.asset(cartas[14].img, height: 100),
                       ),
                       GestureDetector(
                         onTap: () {
-                          imgCard20 = imgCard[nImgCard[19]];
-                          setState(() {});
+                          if (iniciar == true) {
+                            play(cartas[15], 15);
+                          }
                         },
-                        child: Image.asset(imgCard20, height: 100),
+                        child: Image.asset(cartas[15].img, height: 100),
                       ),
                     ],
-                  )*/
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (iniciar == true) {
+                            play(cartas[16], 16);
+                          }
+                        },
+                        child: Image.asset(cartas[16].img, height: 100),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          if (iniciar == true) {
+                            play(cartas[17], 17);
+                          }
+                        },
+                        child: Image.asset(cartas[17].img, height: 100),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          if (iniciar == true) {
+                            play(cartas[18], 18);
+                          }
+                        },
+                        child: Image.asset(cartas[18].img, height: 100),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          if (iniciar == true) {
+                            play(cartas[19], 19);
+                          }
+                        },
+                        child: Image.asset(cartas[19].img, height: 100),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              SizedBox(height: 20),
-              Text("Developed by JP Almeida",
+              const SizedBox(height: 20),
+              const Text("Developed by JP Almeida",
                   style: TextStyle(color: Colors.grey)),
             ],
           )),
