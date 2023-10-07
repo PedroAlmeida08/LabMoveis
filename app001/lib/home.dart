@@ -118,6 +118,15 @@ class _HomeState extends State<Home> {
     nImgCard.shuffle();
   }
 
+  void flip(CardObj card1, CardObj card2) {
+    for (int i = 0; i < cartas.length; i++) {
+      if ((card1.pos == cartas[i].pos) | (card2.pos == cartas[i].pos)) {
+        cartas[i].img = imgFundo;
+        cartas[i].isFlipped = false;
+      }
+    }
+  }
+
   void play(CardObj carta, int pos) {
     if ((carta.isFlipped == false) & (ct < 2)) {
       setState(() {
@@ -145,12 +154,7 @@ class _HomeState extends State<Home> {
             (card2.img != "") &
             (card1.img != card2.img)) {
           setState(() {
-            for (int i = 0; i < cartas.length; i++) {
-              if ((card1.pos == cartas[i].pos) | (card2.pos == cartas[i].pos)) {
-                cartas[i].img = imgFundo;
-                cartas[i].isFlipped = false;
-              }
-            }
+            flip(card1, card2);
           });
         }
         card1 = cartaLimpa;
