@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:app001/cardObj.dart';
@@ -114,7 +112,7 @@ class _HomeState extends State<Home> {
         cartas[i].img = imgCard[nImgCard[i]];
       }
     });
-    await Future.delayed(Duration(seconds: 4));
+    await Future.delayed(const Duration(seconds: 4));
     setState(() {
       for (int i = 0; i < cartas.length; i++) {
         cartas[i].img = imgFundo;
@@ -170,7 +168,7 @@ class _HomeState extends State<Home> {
         } else if ((card1.img != "") &
             (card2.img != "") &
             (card1.img != card2.img)) {
-          await Future.delayed(Duration(milliseconds: 850));
+          await Future.delayed(const Duration(milliseconds: 850));
           setState(() {
             flip(card1, card2);
           });
@@ -181,9 +179,9 @@ class _HomeState extends State<Home> {
         ct = 0;
       }
     }
-    if (pares == 10) {
+    /*if (pares == 10) {
       print("Acabou!");
-    }
+    }*/
   }
 
   void resetar() {
