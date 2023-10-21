@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:app001/cardObj.dart';
@@ -106,6 +108,20 @@ class _HomeState extends State<Home> {
     CardObj(20, "images/fundo.png", false),
   ];
 
+  Future<void> showGame() async {
+    setState(() {
+      for (int i = 0; i < cartas.length; i++) {
+        cartas[i].img = imgCard[nImgCard[i]];
+      }
+    });
+    await Future.delayed(Duration(seconds: 4));
+    setState(() {
+      for (int i = 0; i < cartas.length; i++) {
+        cartas[i].img = imgFundo;
+      }
+    });
+  }
+
   void init() {
     if ((numbers == true) & (letters == false)) {
       imgCard = numbersFigures;
@@ -116,6 +132,7 @@ class _HomeState extends State<Home> {
     }
     iniciar = true;
     nImgCard.shuffle();
+    showGame();
   }
 
   void flip(CardObj card1, CardObj card2) {
@@ -127,7 +144,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void play(CardObj carta, int pos) {
+  Future<void> play(CardObj carta, int pos) async {
     if ((carta.isFlipped == false) & (ct < 2)) {
       setState(() {
         carta.img = imgCard[nImgCard[pos]];
@@ -153,6 +170,7 @@ class _HomeState extends State<Home> {
         } else if ((card1.img != "") &
             (card2.img != "") &
             (card1.img != card2.img)) {
+          await Future.delayed(Duration(milliseconds: 850));
           setState(() {
             flip(card1, card2);
           });
@@ -200,7 +218,8 @@ class _HomeState extends State<Home> {
       ),
       body: Container(
           padding: const EdgeInsets.all(20),
-          child: Column(
+          child: SingleChildScrollView(
+              child: Column(
             children: [
               Column(
                 children: [
@@ -461,7 +480,7 @@ class _HomeState extends State<Home> {
               const Text("Developed by JP Almeida",
                   style: TextStyle(color: Colors.grey)),
             ],
-          )),
+          ))),
     );
   }
 }
