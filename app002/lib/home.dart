@@ -76,22 +76,32 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Weatjer App')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextField(
-                keyboardType: TextInputType.name,
-                onChanged: (value) => cidade = value,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    getData();
-                  },
-                  child: Text("Buscar")),
-            ],
+      appBar: AppBar(
+        title: const Text("Weather App"),
+      ),
+      body: Container(
+        padding:
+            const EdgeInsets.only(top: 10, right: 20, bottom: 20, left: 20),
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextField(
+                  keyboardType: TextInputType.name,
+                  onChanged: (value) => cidade = value,
+                ),
+                const SizedBox(height: 15),
+                ElevatedButton(
+                    onPressed: () {
+                      getData();
+                    },
+                    child: Text("Buscar")),
+              ],
+            ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
