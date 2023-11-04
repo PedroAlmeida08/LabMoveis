@@ -12,66 +12,65 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  TextEditingController cepController = TextEditingController();
-  String logradouro = "", bairro = "", uf = "";
+  TextEditingController cityController = TextEditingController();
+  String cidade = "";
+  double lat = 0, long = 0;
+  List<double> temps = [0, 0, 0, 0, 0];
 
-  String latitude = "33.223191";
-  String longitude = "43.679291";
+  Future getData() async {
+    getLatLong(cidade);
+    getWeatherForecast();
+    getCurrentAirPollutionData();
+  }
 
-  Future getAirPollutionData() async {
+  Future getLatLong(String cidade) async {
     String url =
-        "http://api.openweathermap.org/data/2.5/air_pollution?lat=$latitude&lon=$longitude&appid=$apiKey";
-    print(url);
+        "http://api.openweathermap.org/geo/1.0/direct?q=$cidade&limit=5&appid=$apiKey";
     http.Response response = await http.get(Uri.parse(url));
-    print(response.body);
+
+    List<dynamic> data = jsonDecode(response.body);
+    //print(response.body);
+    lat = data[0]["lat"];
+    long = data[0]["lon"];
+
+    print("Lat: $lat");
+    print("Long: $long");
+  }
+
+  Future getWeatherForecast() async {
+    String url =
+        "http://api.openweathermap.org/data/2.5/forecast?lat=44.34&lon=10.99&appid=$apiKey";
+    http.Response response = await http.get(Uri.parse(url));
 
     Map<String, dynamic> data = jsonDecode(response.body);
 
-    double so2 = data["list"][0]["components"]["so2"];
-    double no2 = data["list"][0]["components"]["no2"];
-    double pm10 = data["list"][0]["components"]["pm10"];
-    double pm2_5 = data["list"][0]["components"]["pm2_5"];
-    double o3 = data["list"][0]["components"]["o3"];
-    double co = data["list"][0]["components"]["co"];
+    for (int i = 0; i < data.length; i++) {
+      temps[i] = data["list"][i]["main"]["temp"] - 273;
+      print(temps[i].toStringAsFixed(2));
+    }
+  }
 
-    if (so2 < 20 &&
-        no2 < 40 &&
-        pm10 < 20 &&
-        pm2_5 < 10 &&
-        o3 < 60 &&
-        co < 4400) {
+  Future getCurrentAirPollutionData() async {
+    String url =
+        "http://api.openweathermap.org/data/2.5/air_pollution?lat=$lat&lon=$long&appid=$apiKey";
+    http.Response response = await http.get(Uri.parse(url));
+    //print(response.body);
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+
+    double aqi = data["list"][0]["main"]["aqi"];
+
+    if (aqi == 1) {
       print("Good");
-    } else if (so2 < 80 &&
-        no2 < 70 &&
-        pm10 < 50 &&
-        pm2_5 < 25 &&
-        o3 < 100 &&
-        co < 9400) {
+    } else if (aqi == 2) {
       print("Fair");
-    } else if (so2 < 250 &&
-        no2 < 150 &&
-        pm10 < 100 &&
-        pm2_5 < 50 &&
-        o3 < 140 &&
-        co < 12400) {
+    } else if (aqi == 3) {
       print("Moderate");
-    } else if (so2 < 350 &&
-        no2 < 200 &&
-        pm10 < 200 &&
-        pm2_5 < 75 &&
-        o3 < 180 &&
-        co < 15400) {
+    } else if (aqi == 4) {
       print("Poor");
     } else {
       print("Very poor");
     }
-
-    print("SO2: ${so2}");
-    print("NO2: ${no2}");
-    print("PM10: ${pm10}");
-    print("PM2.5: ${pm2_5}");
-    print("O3: ${o3}");
-    print("CO: ${co}");
   }
 
   @override
@@ -83,12 +82,12 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               TextField(
-                keyboardType: TextInputType.number,
-                controller: cepController,
+                keyboardType: TextInputType.name,
+                onChanged: (value) => cidade = value,
               ),
               ElevatedButton(
                   onPressed: () {
-                    getAirPollutionData();
+                    getData();
                   },
                   child: Text("Buscar")),
             ],
