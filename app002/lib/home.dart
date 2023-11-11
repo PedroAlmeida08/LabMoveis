@@ -13,17 +13,45 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  TextEditingController cityController = TextEditingController();
   String cidade = "";
   double lat = 0, long = 0;
-  List<previsao> prevs = [];
-  String img_aqi = "images/bom.png";
+  bool visivel = false;
+  String imgData = "images/data.png";
+  String imgTemp = "images/temp.png";
+  String imgMax = "images/min.png";
+  String imgMin = "images/max.png";
+
+  List<previsao> prevs = [
+    previsao("", 0, 0, 0, "°C", "", "images/fundo_branco.png"),
+    previsao("", 0, 0, 0, "°C", "", "images/fundo_branco.png"),
+    previsao("", 0, 0, 0, "°C", "", "images/fundo_branco.png"),
+    previsao("", 0, 0, 0, "°C", "", "images/fundo_branco.png"),
+    previsao("", 0, 0, 0, "°C", "", "images/fundo_branco.png")
+  ];
+
+  String img_aqi = "images/fundo_branco.png";
+
+  reset() {
+    lat = 0;
+    long = 0;
+    cidade = "";
+    for (int i = 0; i < prevs.length; i++) {
+      prevs[i].data = "";
+      prevs[i].temp = 0;
+      prevs[i].temp_max = 0;
+      prevs[i].temp_min = 0;
+      prevs[i].climaTxt = "";
+      prevs[i].climaImg = "images/fundo_branco.png";
+    }
+  }
 
   Future getData() async {
-    getLatLong(cidade);
+    reset();
+    //getLatLong(cidade);
     getWeatherForecast();
     getCurrentAirPollutionData();
     setState(() {});
+    visivel = true;
   }
 
   Future getLatLong(String cidade) async {
@@ -38,11 +66,10 @@ class _HomeState extends State<Home> {
 
   Future getWeatherForecast() async {
     String url =
-        "http://api.openweathermap.org/data/2.5/forecast?lat=44.34&lon=10.99&appid=$apiKey";
+        "http://api.openweathermap.org/data/2.5/forecast?lat=$lat.34&lon=$long&appid=$apiKey";
     http.Response response = await http.get(Uri.parse(url));
 
     Map<String, dynamic> dados = jsonDecode(response.body);
-    previsao prev;
 
     for (int i = 0; i < dados.length; i++) {
       // Conversão de TimeStamp em dia/mes/ano
@@ -52,24 +79,26 @@ class _HomeState extends State<Home> {
       int ano = dt.year;
       int mes = dt.month;
       int dia = dt.day;
-      String data = "$dia/$mes/$ano";
+      prevs[i].data = "$dia/$mes/$ano";
+
+      prevs[i].temp = dados["list"][i]["main"]["temp"] - 273;
+      prevs[i].temp_max = dados["list"][i]["main"]["temp_max"] - 273;
+      prevs[i].temp_min = dados["list"][i]["main"]["temp_min"] - 273;
 
       String clima = dados["list"][i]["weather"][0]["main"];
-      String climaTxt = "";
-      String climaImg = "";
 
       if (clima == "Thunderstorm") {
-        climaTxt = "Tempestade";
-        climaImg = ("images/thunderstorm.png");
+        prevs[i].climaTxt = "Tempestade";
+        prevs[i].climaImg = ("images/thunderstorm.png");
       } else if (clima == "Drizzle") {
-        climaTxt = "Chuva Fraca";
-        climaImg = ("images/drizzle.png");
+        prevs[i].climaTxt = "Chuva Fraca";
+        prevs[i].climaImg = ("images/drizzle.png");
       } else if (clima == "Rain") {
-        climaTxt = "Chuva Forte";
-        climaImg = ("images/rain.png");
+        prevs[i].climaTxt = "Chuva Forte";
+        prevs[i].climaImg = ("images/rain.png");
       } else if (clima == "Snow") {
-        climaTxt = "Neve";
-        climaImg = ("images/snow.png");
+        prevs[i].climaTxt = "Neve";
+        prevs[i].climaImg = ("images/snow.png");
       } else if (clima == "Mist" ||
           clima == "Smoke" ||
           clima == "Haze" ||
@@ -78,35 +107,15 @@ class _HomeState extends State<Home> {
           clima == "Ash" ||
           clima == "Squall" ||
           clima == "Tornado") {
-        climaTxt = "Nublado";
-        climaImg = ("images/mist.png");
+        prevs[i].climaTxt = "Nublado";
+        prevs[i].climaImg = ("images/mist.png");
       } else if (clima == "Clear") {
-        climaTxt = "Céu Limpo";
-        climaImg = ("images/clear.png");
+        prevs[i].climaTxt = "Céu Limpo";
+        prevs[i].climaImg = ("images/clear.png");
       } else if (clima == "Clouds") {
-        climaTxt = "Encoberto";
-        climaImg = ("images/clouds.png");
+        prevs[i].climaTxt = "Encoberto";
+        prevs[i].climaImg = ("images/clouds.png");
       }
-
-      prev = previsao(
-          data,
-          dados["list"][i]["main"]["temp"] - 273,
-          dados["list"][i]["main"]["temp_max"] - 273,
-          dados["list"][i]["main"]["temp_min"] - 273,
-          "°C",
-          climaTxt,
-          climaImg);
-      prevs.add(prev);
-    }
-
-    for (var i = 0; i < prevs.length; i++) {
-      print(prevs[i].data);
-      print(prevs[i].temp);
-      print(prevs[i].temp_max);
-      print(prevs[i].temp_min);
-      print(prevs[i].escala);
-      print(prevs[i].climaTxt);
-      print(prevs[i].climaImg);
     }
 
     setState(() {});
@@ -162,217 +171,229 @@ class _HomeState extends State<Home> {
                 ElevatedButton(
                     onPressed: () {
                       getData();
-                      print(prevs);
                     },
                     child: Text("Buscar")),
                 const SizedBox(height: 25),
-                Center(
-                    child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Image.asset("images/clouds.png", height: 250),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Image.asset("images/data.png",
-                                height: 30, width: 30),
-                            Text("11/11/2023")
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Image.asset("images/temp.png",
-                                height: 30, width: 30),
-                            Text("37°C")
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Image.asset("images/max.png",
-                                height: 20, width: 20),
-                            Text(" 27°C")
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Image.asset("images/min.png",
-                                height: 20, width: 20),
-                            Text(" 42°C")
-                          ],
-                        ),
-                      ],
-                    )
-                  ],
-                )),
-                Center(
-                  child: Row(
+                Visibility(
+                  visible: visivel,
+                  child: Center(
+                      child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      Image.asset(prevs[0].climaImg, height: 250),
                       Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Image.asset("images/clear.png",
-                              height: 100, width: 100),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  Image.asset("images/data.png",
-                                      height: 30, width: 30),
-                                  Text("11/11/2023")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/temp.png",
-                                      height: 30, width: 30),
-                                  Text("37°C")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/max.png",
-                                      height: 20, width: 20),
-                                  Text(" 27°C")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/min.png",
-                                      height: 20, width: 20),
-                                  Text(" 42°C")
-                                ],
-                              ),
+                              Image.asset(imgData, height: 30, width: 30),
+                              Text(prevs[0].data)
                             ],
-                          )
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Image.asset("images/clear.png",
-                              height: 100, width: 100),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                          ),
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  Image.asset("images/data.png",
-                                      height: 30, width: 30),
-                                  Text("11/11/2023")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/temp.png",
-                                      height: 30, width: 30),
-                                  Text("37°C")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/max.png",
-                                      height: 20, width: 20),
-                                  Text(" 27°C")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/min.png",
-                                      height: 20, width: 20),
-                                  Text(" 42°C")
-                                ],
-                              ),
+                              Image.asset(imgTemp, height: 30, width: 30),
+                              Text("${prevs[0].temp.toStringAsFixed(2)} °C")
                             ],
-                          )
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset("images/clear.png",
-                              height: 100, width: 100),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                          ),
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  Image.asset("images/data.png",
-                                      height: 30, width: 30),
-                                  Text("11/11/2023")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/temp.png",
-                                      height: 30, width: 30),
-                                  Text("37°C")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/max.png",
-                                      height: 20, width: 20),
-                                  Text(" 27°C")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/min.png",
-                                      height: 20, width: 20),
-                                  Text(" 42°C")
-                                ],
-                              ),
+                              Image.asset(imgMax, height: 20, width: 20),
+                              Text("${prevs[0].temp_max.toStringAsFixed(2)} °C")
                             ],
-                          )
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Image.asset("images/clear.png",
-                              height: 100, width: 100),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
+                          ),
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  Image.asset("images/data.png",
-                                      height: 30, width: 30),
-                                  Text("11/11/2023")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/temp.png",
-                                      height: 30, width: 30),
-                                  Text("37°C")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/max.png",
-                                      height: 20, width: 20),
-                                  Text(" 27°C")
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Image.asset("images/min.png",
-                                      height: 20, width: 20),
-                                  Text(" 42°C")
-                                ],
-                              ),
+                              Image.asset(imgMin, height: 20, width: 20),
+                              Text("${prevs[0].temp_min.toStringAsFixed(2)} °C")
                             ],
-                          )
+                          ),
                         ],
-                      ),
+                      )
                     ],
-                  ),
-                )
+                  )),
+                ),
+                Visibility(
+                    visible: visivel,
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Image.asset(prevs[1].climaImg,
+                                  height: 100, width: 100),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Image.asset(imgData,
+                                          height: 30, width: 30),
+                                      Text(prevs[1].data)
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgTemp,
+                                          height: 30, width: 30),
+                                      Text(
+                                          "${prevs[1].temp.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgMax,
+                                          height: 20, width: 20),
+                                      Text(
+                                          "${prevs[1].temp_max.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgMin,
+                                          height: 20, width: 20),
+                                      Text(
+                                          "${prevs[1].temp_min.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Image.asset(prevs[2].climaImg,
+                                  height: 100, width: 100),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Image.asset(imgData,
+                                          height: 30, width: 30),
+                                      Text(prevs[2].data)
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgTemp,
+                                          height: 30, width: 30),
+                                      Text(
+                                          "${prevs[2].temp.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgMax,
+                                          height: 20, width: 20),
+                                      Text(
+                                          "${prevs[2].temp_max.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgMin,
+                                          height: 20, width: 20),
+                                      Text(
+                                          "${prevs[2].temp_min.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(prevs[3].climaImg,
+                                  height: 100, width: 100),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Image.asset(imgData,
+                                          height: 30, width: 30),
+                                      Text(prevs[3].data)
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgTemp,
+                                          height: 30, width: 30),
+                                      Text(
+                                          "${prevs[3].temp.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgMax,
+                                          height: 20, width: 20),
+                                      Text(
+                                          "${prevs[3].temp_max.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgMin,
+                                          height: 20, width: 20),
+                                      Text(
+                                          "${prevs[3].temp_min.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Image.asset(prevs[4].climaImg,
+                                  height: 100, width: 100),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Image.asset(imgData,
+                                          height: 30, width: 30),
+                                      Text(prevs[4].data)
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgTemp,
+                                          height: 30, width: 30),
+                                      Text(
+                                          "${prevs[4].temp.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgMax,
+                                          height: 20, width: 20),
+                                      Text(
+                                          "${prevs[4].temp_max.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Image.asset(imgMin,
+                                          height: 20, width: 20),
+                                      Text(
+                                          "${prevs[4].temp_min.toStringAsFixed(2)} °C")
+                                    ],
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    )),
               ],
             ),
           ),
