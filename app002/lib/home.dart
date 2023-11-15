@@ -1,3 +1,4 @@
+import 'package:app002/aqi.dart';
 import 'package:app002/previsao.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -13,7 +14,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  String cidade = "";
+  TextEditingController cityController = TextEditingController();
   double lat = 0, long = 0;
   bool visivel = false;
   String imgData = "images/data.png";
@@ -31,74 +32,68 @@ class _HomeState extends State<Home> {
 
   String img_aqi = "images/fundo_branco.png";
 
-  reset() {
-    lat = 0;
-    long = 0;
-    cidade = "";
-    for (int i = 0; i < prevs.length; i++) {
-      prevs[i].data = "";
-      prevs[i].temp = 0;
-      prevs[i].temp_max = 0;
-      prevs[i].temp_min = 0;
-      prevs[i].climaTxt = "";
-      prevs[i].climaImg = "images/fundo_branco.png";
-    }
-  }
-
-  Future getData() async {
-    reset();
-    //getLatLong(cidade);
-    getWeatherForecast();
-    getCurrentAirPollutionData();
+  /*Future getData(String cidade) async {
+    getLatLong(cidade);
+    getWeatherForecast(lat, long);
+    //getCurrentAirPollutionData();
     setState(() {});
-    visivel = true;
-  }
+    //visivel = true;
+  }*/
 
-  Future getLatLong(String cidade) async {
-    String url =
+  Future getData(String cidade) async {
+    String urlLatLong =
         "http://api.openweathermap.org/geo/1.0/direct?q=$cidade&limit=5&appid=$apiKey";
-    http.Response response = await http.get(Uri.parse(url));
+    http.Response responseLatLong = await http.get(Uri.parse(urlLatLong));
 
-    List<dynamic> data = jsonDecode(response.body);
-    lat = data[0]["lat"];
-    long = data[0]["lon"];
-  }
+    List<dynamic> dadosLatLong = jsonDecode(responseLatLong.body);
 
-  Future getWeatherForecast() async {
-    String url =
-        "http://api.openweathermap.org/data/2.5/forecast?lat=$lat.34&lon=$long&appid=$apiKey";
-    http.Response response = await http.get(Uri.parse(url));
+    lat = dadosLatLong[0]["lat"];
+    long = dadosLatLong[0]["lon"];
 
-    Map<String, dynamic> dados = jsonDecode(response.body);
+    print("Lat: $lat");
+    print("Long: $long");
 
-    for (int i = 0; i < dados.length; i++) {
-      // Conversão de TimeStamp em dia/mes/ano
+    String urlWeatherForecast =
+        "http://api.openweathermap.org/data/2.5/forecast?lat=$lat&lon=$long&appid=$apiKey";
+    http.Response responseWeatherForecast =
+        await http.get(Uri.parse(urlWeatherForecast));
+
+    Map<String, dynamic> dadosWeatherForecast =
+        jsonDecode(responseWeatherForecast.body);
+
+    for (int i = 0, j = 0;
+        i < dadosWeatherForecast["list"].length;
+        i = i + 8, j++) {
+      //get Datas
       DateTime dt = DateTime.fromMillisecondsSinceEpoch(
-          dados["list"][i]["dt"] * 1000,
+          dadosWeatherForecast["list"][i]["dt"] * 1000,
           isUtc: true);
       int ano = dt.year;
       int mes = dt.month;
       int dia = dt.day;
-      prevs[i].data = "$dia/$mes/$ano";
+      prevs[j].data = "$dia/$mes/$ano";
 
-      prevs[i].temp = dados["list"][i]["main"]["temp"] - 273;
-      prevs[i].temp_max = dados["list"][i]["main"]["temp_max"] - 273;
-      prevs[i].temp_min = dados["list"][i]["main"]["temp_min"] - 273;
+      //get Temperaturas
+      prevs[j].temp = dadosWeatherForecast["list"][i]["main"]["temp"] - 273;
+      prevs[j].temp_max =
+          dadosWeatherForecast["list"][i]["main"]["temp_max"] - 273;
+      prevs[j].temp_min =
+          dadosWeatherForecast["list"][i]["main"]["temp_min"] - 273;
 
-      String clima = dados["list"][i]["weather"][0]["main"];
-
+      //get Clima
+      String clima = dadosWeatherForecast["list"][i]["weather"][0]["main"];
       if (clima == "Thunderstorm") {
-        prevs[i].climaTxt = "Tempestade";
-        prevs[i].climaImg = ("images/thunderstorm.png");
+        prevs[j].climaTxt = "Tempestade";
+        prevs[j].climaImg = ("images/thunderstorm.png");
       } else if (clima == "Drizzle") {
-        prevs[i].climaTxt = "Chuva Fraca";
-        prevs[i].climaImg = ("images/drizzle.png");
+        prevs[j].climaTxt = "Chuva Fraca";
+        prevs[j].climaImg = ("images/drizzle.png");
       } else if (clima == "Rain") {
-        prevs[i].climaTxt = "Chuva Forte";
-        prevs[i].climaImg = ("images/rain.png");
+        prevs[j].climaTxt = "Chuva Forte";
+        prevs[j].climaImg = ("images/rain.png");
       } else if (clima == "Snow") {
-        prevs[i].climaTxt = "Neve";
-        prevs[i].climaImg = ("images/snow.png");
+        prevs[j].climaTxt = "Neve";
+        prevs[j].climaImg = ("images/snow.png");
       } else if (clima == "Mist" ||
           clima == "Smoke" ||
           clima == "Haze" ||
@@ -107,17 +102,24 @@ class _HomeState extends State<Home> {
           clima == "Ash" ||
           clima == "Squall" ||
           clima == "Tornado") {
-        prevs[i].climaTxt = "Nublado";
-        prevs[i].climaImg = ("images/mist.png");
+        prevs[j].climaTxt = "Nublado";
+        prevs[j].climaImg = ("images/mist.png");
       } else if (clima == "Clear") {
-        prevs[i].climaTxt = "Céu Limpo";
-        prevs[i].climaImg = ("images/clear.png");
+        prevs[j].climaTxt = "Céu Limpo";
+        prevs[j].climaImg = ("images/clear.png");
       } else if (clima == "Clouds") {
-        prevs[i].climaTxt = "Encoberto";
-        prevs[i].climaImg = ("images/clouds.png");
+        prevs[j].climaTxt = "Encoberto";
+        prevs[j].climaImg = ("images/clouds.png");
       }
+
+      /*print("Data: ${prevs[j].data}");
+      print("Temperatura: ${prevs[j].temp}${prevs[j].escala}");
+      print("Temperatura Máxima: ${prevs[j].temp_max}${prevs[j].escala}");
+      print("Temperatura Mínima: ${prevs[j].temp_min}${prevs[j].escala}");
+      print("Clima: ${prevs[j].climaTxt} - ${prevs[j].climaImg}");*/
     }
 
+    visivel = true;
     setState(() {});
   }
 
@@ -125,7 +127,6 @@ class _HomeState extends State<Home> {
     String url =
         "http://api.openweathermap.org/data/2.5/air_pollution?lat=$lat&lon=$long&appid=$apiKey";
     http.Response response = await http.get(Uri.parse(url));
-    //print(response.body);
 
     Map<String, dynamic> data = jsonDecode(response.body);
 
@@ -150,7 +151,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Weather App"),
+        title: const Text("Weather App - Previsão do Tempo"),
       ),
       body: Container(
         padding:
@@ -162,7 +163,7 @@ class _HomeState extends State<Home> {
               children: [
                 TextField(
                   keyboardType: TextInputType.name,
-                  onChanged: (value) => cidade = value,
+                  controller: cityController,
                   decoration: new InputDecoration.collapsed(
                     hintText: 'Digite o nome de um país ou cidade',
                   ),
@@ -170,7 +171,7 @@ class _HomeState extends State<Home> {
                 const SizedBox(height: 25),
                 ElevatedButton(
                     onPressed: () {
-                      getData();
+                      getData(cityController.text);
                     },
                     child: Text("Buscar")),
                 const SizedBox(height: 25),
@@ -394,6 +395,18 @@ class _HomeState extends State<Home> {
                         ],
                       ),
                     )),
+                const SizedBox(height: 35),
+                Visibility(
+                    visible: visivel,
+                    child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => AQI(lat, long)),
+                          );
+                        },
+                        child: Text("Qualidade do Ar"))),
               ],
             ),
           ),
