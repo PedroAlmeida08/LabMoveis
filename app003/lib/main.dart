@@ -33,7 +33,6 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ↓ Add the code below.
   var favorites = <WordPair>[];
 
   void toggleFavorite() {
@@ -52,8 +51,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0; // ← Add this property.
-
+  var selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     Widget page;
@@ -84,9 +82,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   label: Text('Favorites'),
                 ),
               ],
-              selectedIndex: selectedIndex, // ← Change to this.
+              selectedIndex: selectedIndex,
               onDestinationSelected: (value) {
-                // ↓ Replace print with this.
                 setState(() {
                   selectedIndex = value;
                 });
@@ -168,8 +165,6 @@ class BigCard extends StatelessWidget {
       color: theme.colorScheme.primary,
       child: Padding(
         padding: const EdgeInsets.all(20),
-
-        // ↓ Make the following change.
         child: Text(
           pair.asLowerCase,
           style: style,
