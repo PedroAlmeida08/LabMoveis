@@ -208,10 +208,9 @@ class FavoritesPage extends StatelessWidget {
               title: Text(favorite.name),
               trailing: IconButton(
                 icon: Icon(Icons.delete),
-                onPressed: () {
-                  appState.favoriteHelper.deleteFavorite(favorite.id!);
-                  // Optionally, you can notify the app state to refresh the UI
-                  appState.notifyListeners();
+                onPressed: () async {
+                  await appState.favoriteHelper.deleteFavorite(favorite.id!);
+                  appState.toggleFavorite(); // Refresh app state
                 },
               ),
             );

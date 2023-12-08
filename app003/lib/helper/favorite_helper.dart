@@ -46,11 +46,8 @@ class FavoriteHelper {
 
   Future<int> insertFavorite(Favorite favorite) async {
     var database = await db;
-    print("Insert Favorite");
 
     int result = await database!.insert(tableName, favorite.toMap());
-
-    print("Inseriu no banco");
 
     return result;
   }
