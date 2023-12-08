@@ -1,3 +1,5 @@
+import 'package:PalavrasFavoritas/helper/favorite_helper.dart';
+import 'package:PalavrasFavoritas/model/favorite.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,6 +29,7 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
+  final FavoriteHelper favoriteHelper = FavoriteHelper();
 
   void getNext() {
     current = WordPair.random();
@@ -41,6 +44,12 @@ class MyAppState extends ChangeNotifier {
     } else {
       favorites.add(current);
     }
+    notifyListeners();
+  }
+
+  Future<void> addToFavorites(String word) async {
+    final favorite = Favorite(word);
+    await favoriteHelper.insertFavorite(favorite);
     notifyListeners();
   }
 }
@@ -127,6 +136,7 @@ class GeneratorPage extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   appState.toggleFavorite();
+                  appState.addToFavorites(pair.asLowerCase);
                 },
                 icon: Icon(icon),
                 label: Text('Like'),
@@ -180,25 +190,34 @@ class FavoritesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
 
-    if (appState.favorites.isEmpty) {
-      return Center(
-        child: Text('No favorites yet.'),
-      );
-    }
+    return FutureBuilder<List<Favorite>>(
+      future: appState.favoriteHelper.getFavorites(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Text('No favorites yet.'),
+          );
+        }
 
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text('You have '
-              '${appState.favorites.length} favorites:'),
-        ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
-          ),
-      ],
+        return ListView.builder(
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            final favorite = snapshot.data![index];
+            return ListTile(
+              leading: Icon(Icons.favorite),
+              title: Text(favorite.name),
+              trailing: IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  appState.favoriteHelper.deleteFavorite(favorite.id!);
+                  // Optionally, you can notify the app state to refresh the UI
+                  appState.notifyListeners();
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

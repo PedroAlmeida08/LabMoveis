@@ -44,16 +44,18 @@ class FavoriteHelper {
     return _db;
   }
 
-  Future<int> insertTask(Favorite favorite) async {
+  Future<int> insertFavorite(Favorite favorite) async {
     var database = await db;
     print("Insert Favorite");
 
     int result = await database!.insert(tableName, favorite.toMap());
 
+    print("Inseriu no banco");
+
     return result;
   }
 
-  Future<int> updateTask(Favorite favorite) async {
+  Future<int> updateFavorite(Favorite favorite) async {
     var database = await db;
 
     int result = await database!.update(tableName, favorite.toMap(),
@@ -71,13 +73,10 @@ class FavoriteHelper {
     return result;
   }
 
-  getFavorites() async {
+  Future<List<Favorite>> getFavorites() async {
     var database = await db;
-
     String sql = "SELECT * FROM $tableName;";
-
-    List results = await database!.rawQuery(sql);
-
-    return results;
+    List<Map<String, dynamic>> results = await database!.rawQuery(sql);
+    return results.map((map) => Favorite.fromMap(map)).toList();
   }
 }
