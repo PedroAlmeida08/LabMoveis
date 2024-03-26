@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const apiKey = '4bf127e565a6c6be161aef2985a7864f';
-
 class Home extends StatefulWidget {
   const Home({super.key});
 
